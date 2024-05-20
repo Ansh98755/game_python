@@ -1,15 +1,34 @@
-import pygame# we are importing the essetial tools for game development from the python lib
+import pygame  # Importing the essential tools for game development from the Python library
+from sys import exit
 
-pygame.init()# we are initializing the python library it is very important as all the funtions of pygame works only then all its subparts (sound , animation , etc) it is the backend of pygame
+pygame.init()  # Initializing the Pygame library, which is crucial for using its functions (sound, animation, etc.)
 
+# Setting up the display
+screen = pygame.display.set_mode((1000, 800))  # Creating a window with a width of 1000 pixels and a height of 800 pixels
+pygame.display.set_caption("Space Dodge")  # Setting the title of the window
 
-screen=pygame.display.set_mode((1000,800))#here we are setting the window height and width which we will see it appears onlu for sec because the code ends  without any loops and condition
+# Loading the background image
+BG = pygame.image.load("s.jpg")
 
-while True:
-    for event in pygame.event.get():
-        if event.type==pygame.QUIT:
-            pygame.quit()
-    #draw all our elements
-    #update all our everything
-    pygame.display.update()#to update our display // here we won't be able to close the display so we have to set the player input for closing the game , as if we run the code here it won't close
-    #we encounter an error although our code is running the error is video system not initialized  it is becouse we are initializing the pygame using init() but at the same time we are quiting it also it gives an error becouse our while loop remained open and unable to perform further operation after the quit statement
+# Function to draw elements on the screen
+def draw():
+    screen.blit(BG, (0, 0))  # Drawing the background image at the top-left corner (0, 0)
+    pygame.display.update()  # Updating the display to reflect the changes
+
+# Main function to run the game loop
+def main():
+    clock = pygame.time.Clock()  # Creating a clock object to control the frame rate
+
+    while True:
+        for event in pygame.event.get():  # Handling events
+            if event.type == pygame.QUIT:  # Checking if the quit event is triggered (e.g., closing the window)
+                pygame.quit()  # Quitting Pygame
+                exit()  # Exiting the program
+
+        draw()  # Calling the draw function to render the background
+
+        clock.tick(60)  # Setting the frame rate to 60 frames per second (FPS)
+
+# Running the main function
+if __name__ == "__main__":
+    main()
