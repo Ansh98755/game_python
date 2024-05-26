@@ -1,12 +1,13 @@
-import pygame  # Importing the essential tools for game development from the Python library
+import pygame
 from sys import exit
-import time  # Importing time module for elapsed time calculation
+import time
+import random
 
-pygame.init()  # Initializing the Pygame library, which is crucial for using its functions (sound, animation, etc.)
+pygame.init()
 
 # Setting up the display
-screen = pygame.display.set_mode((1000, 800))  # Creating a window with a width of 1000 pixels and a height of 800 pixels
-pygame.display.set_caption("Space Dodge")  # Setting the title of the window
+screen = pygame.display.set_mode((1000, 800))
+pygame.display.set_caption("Space Dodge")
 
 # Loading and scaling the background image
 BG = pygame.transform.scale(pygame.image.load("s.jpg"), (1000, 800))
@@ -15,41 +16,76 @@ BG = pygame.transform.scale(pygame.image.load("s.jpg"), (1000, 800))
 player_width = 60
 player_height = 100
 player_vel = 7
+star_width = 10
+star_height = 20
+star_vel = 5
 
 # Initializing font
 Font = pygame.font.SysFont("cosmicsans", 30)
 
 # Function to draw elements on the screen
-def draw(player, elapsed_time):
-    screen.blit(BG, (0, 0))  # Drawing the background image at the top-left corner (0, 0)
+def draw(player, stars, elapsed_time):
+    screen.blit(BG, (0, 0))
     time_text = Font.render(f"Time: {round(elapsed_time)}s", True, "white")
     screen.blit(time_text, (10, 10))
-    pygame.draw.rect(screen, "red", player)  # Drawing the player as a red rectangle
-    pygame.display.update()  # Updating the display to reflect the changes
+    pygame.draw.rect(screen, "red", player)
+    
+    for star in stars:
+        pygame.draw.rect(screen, "yellow", star)
+    
+    pygame.display.update()
+
+# Function to display the game over screen
+def game_over_screen(elapsed_time):
+    screen.blit(BG, (0, 0))
+    game_over_text = Font.render("Game Over", True, "white")
+    time_survived_text = Font.render(f"You survived for {round(elapsed_time)} seconds", True, "white")
+    screen.blit(game_over_text, (400, 300))
+    screen.blit(time_survived_text, (320, 350))
+    pygame.display.update()
+    pygame.time.wait(3000)
 
 # Main function to run the game loop
 def main():
-    player = pygame.Rect(200, 800 - player_height, player_width, player_height)  # Creating the player rectangle
-    clock = pygame.time.Clock()  # Creating a clock object to control the frame rate
-    start_time = time.time()  # Recording the start time for elapsed time calculation
+    player = pygame.Rect(200, 800 - player_height, player_width, player_height)
+    clock = pygame.time.Clock()
+    start_time = time.time()
+    star_add_increment = 2000
+    star_count = 0
+    stars = []
 
     while True:
-        elapsed_time = time.time() - start_time  # Calculating elapsed time
-        for event in pygame.event.get():  # Handling events
-            if event.type == pygame.QUIT:  # Checking if the quit event is triggered (e.g., closing the window)
-                pygame.quit()  # Quitting Pygame
-                exit()  # Exiting the program
+        elapsed_time = time.time() - start_time
+        if star_count > star_add_increment:
+            for _ in range(3):
+                star_x = random.randint(0, 1000 - star_width)
+                star = pygame.Rect(star_x, -star_height, star_width, star_height)
+                stars.append(star)
+            star_add_increment = max(200, star_add_increment - 50)
+            star_count = 0
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
             
-        keys = pygame.key.get_pressed()  # Getting the state of all keyboard buttons
-        if keys[pygame.K_LEFT] and player.x - player_vel >= 0:  # Moving left if the left key is pressed and within bounds
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and player.x - player_vel >= 0:
             player.x -= player_vel
-        if keys[pygame.K_RIGHT] and player.x + player_vel + player_width <= 1000:  # Moving right if the right key is pressed and within bounds
+        if keys[pygame.K_RIGHT] and player.x + player_vel + player_width <= 1000:
             player.x += player_vel
 
-        draw(player, elapsed_time)  # Calling the draw function to render the background and the player
+        for star in stars[:]:
+            star.y += star_vel
+            if star.colliderect(player):
+                game_over_screen(elapsed_time)
+                pygame.quit()
+                exit()
+            if star.y > 800:
+                stars.remove(star)
 
-        clock.tick(60)  # Setting the frame rate to 60 frames per second (FPS)
+        draw(player, stars, elapsed_time)
+        star_count += clock.tick(60)
 
-# Running the main function
 if __name__ == "__main__":
     main()
